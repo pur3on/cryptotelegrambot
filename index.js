@@ -2,11 +2,14 @@ const TelegramBot = require('node-telegram-bot-api');
 require('dotenv').config();
 const token = process.env.TELEGRAM_BOT_TOKEN
 const bot = new TelegramBot(token, {interval: 100, timeout: 20, polling: true});
-const botuname = 'mktchrtdevbot';
+const botuname = 'yummycryptobot';
 bot.on("polling_error", console.log);
 const geckoAPI = 'https://api.coingecko.com/api/v3';
 const geckoWEB = 'https://www.coingecko.com/en/coins/';
 const geckoHOT = 'https://www.coingecko.com/en/discover';
+const poocoin = 'https://poocoin.app/tokens/';
+const bscscanAPI = 'https://api.bscscan.com/api/';
+const APIkey = '';
 const axios = require('axios').default;
 var nf = new Intl.NumberFormat();
 var fs = require('fs');
@@ -20,18 +23,10 @@ const bizThread = 'http://boards.4chan.org/biz/thread/';
 const bizAPI = 'https://a.4cdn.org/biz/threads.json';
 const threadAPI = 'https://a.4cdn.org/biz/thread/';
 const math = require('mathjs');
-const coverCommands = ['media/global.gif', 'media/defi.gif', 'media/help.gif', 'media/hot.gif', 'media/about.gif'];
-const coverBog = ['media/bog1.gif', 'media/bog2.gif', 'media/bog3.gif', 'media/bog4.gif', 'media/bog5.gif'];
+const coverCommands = ['media/global.gif', 'media/defi.gif', 'media/jake.mp4', 'media/hot.gif', 'media/about.gif'];
+const coverBog = ['media/yum1.jpg', 'media/yum2.jpg', 'media/yum3.jpg', 'media/yum4.jpg', 'media/yum5.jpg', 'media/yum6.jpg', 'media/yum7.jpg', 'media/yum8.jpg', 'media/yum9.jpg', 'media/yum10.jpg', 'media/yum11.jpg', 'media/yum12.jpg', 'media/yum13.jpg', 'media/yum14.jpg'];
 
 //KEY TIMEFRAMES IN UNIX
-var fminute = 60000;
-var fhour = 3600000;
-var fday = 86400000;
-var fweek = 604800000;
-var fmonth = 2592000000;
-var ftoday;
-UpdateTime();
-
 var minute = 60;
 var hour = 3600;
 var day = 86400;
@@ -39,21 +34,8 @@ var week = 604800;
 var month = 2592000;
 var today = Math.round((new Date()).getTime() / 1000);
 
-async function UpdateTime() {
-  ftoday = new Date().getTime();
-//  console.log(today);
-  setTimeout(function(){
-    UpdateTime();
-  },1000);
-}
-
-
 var cid;
 var csymbol;
-var available;
-var missing;
-var details;
-var cpriceobj;
 var coinsList;
 var cprice;
 var tdata;
@@ -61,7 +43,6 @@ var imgfile;
 var chartURL;
 var tmamp = 0.182648401826484; //200 DAY AVERAGE RATIO
 var fmamp = 0.045662100456621; //50 DAY AVERAGE RATIO
-var xMins = false; //DISPLAYS MINUTES
 var xHrs = false; //DISPLAY HOURS ONLY
 var xHrsDays = false; //DISPLAY HOURS & DAYS
 var xDays = false; //DISPLAYS DAYS
@@ -73,21 +54,20 @@ console.log(botuname);
 
 //GET COINS LIST
 
-function loadCoins() {
+async function loadCoins() {
     axios.get(geckoAPI + '/coins/list')
     .then(function (response) {
       coinsList = response.data;
     })
-    console.log('Coins list updated.')
-    setTimeout(function(){
-      loadCoins();
-    },fminute);
+
 }
 
 //UPDATE COINS LIST
 
 loadCoins();
-
+setTimeout(function(){
+  loadCoins();
+},24*60*60*60);
 
 
 //START MESSAGE LISTENER
@@ -99,46 +79,27 @@ bot.on('message', (msg) => {
 
   //COIN INTERACTION COMMAND VARS
   var cInfo = "/i ";
-  var cPrice = "/p ";
-  var pHrs = "/ph "//10min int 4h
-  var pDay = "/pd ";//2h int 24h
-  var pWk = "/pw ";//12h int 7days
-  var pMnt = "/pm ";//24h int 30 days
-  var pQrt = "/pq ";//3days int 90d
-  var pSixm = "/ps ";//3days int 180d
-  var pYr = "/py ";//14day int year
-  var iDay = "/id ";//1h int 24h
-  var iWk = "/iw ";//1d int 7d
-  var iFtnt = "/if ";//1d int 14d
-  var iMonth = "/im ";//2d int 30d
-  var iQrt = "/iq ";//8d int 90d
-  var iSixm = "/is ";//12d int 180d
-  var iYear = "/iy ";//24d int 365d
-
-
-  var spit = "/spit ";
-
-  if (uniMsg.startsWith(spit)) {
-        var spitsymbol = uniMsg.substr(6);
-        console.log(spitsymbol);
-        bot.sendMessage (msg.chat.id, '@' + botuname + ' spits on ' + spitsymbol + '.');
-    } else if (uniMsg == spit.substr(0,5)) {
-        bot.sendMessage (msg.chat.id, '@' + botuname + ' spits on the ground. ');
-    } else if (uniMsg == spit.substr(0,5) + '@' + botuname) {
-        bot.sendMessage (msg.chat.id, '@' + botuname + ' spits on the ground. ');
-    }
-
+  var cPrice = "/d ";
+  var cMin = "/mn "//10min int 4h
+  var cThrs = "/mh ";//2h int 12h
+  var cHdy = "/mt ";//12h int 7days
+  var cDay = "/md ";//24h int 30 days
+  var cHwk = "/mw ";//3days int quarter
+  var cMnt = "/mf ";//14day int year
+  var cpHrs = "/ph ";//1h int 24h
+  var cpDay = "/pd ";//1d int 14d
+  var cpWks = "/pw ";//7d int 3mmt
+  var cpHmt = "/pf ";//14d int 180d
+  var cpMonth = "/pm ";
+  var cpQrt = "/pq ";
+  var cpYear = "/py ";
 
   if (uniMsg.startsWith(cInfo)) {
     csymbol = uniMsg.substr(3);
     GetCoin();
     GetProjectInfo();
   } else if (uniMsg == cInfo.substr(0,2)) {
-    csymbol = 'link';
-    GetCoin();
-    GetProjectInfo();
-  } else if (uniMsg == cInfo.substr(0,2) + '@' + botuname) {
-    csymbol = 'link';
+    csymbol = 'yummy';
     GetCoin();
     GetProjectInfo();
   }
@@ -148,257 +109,144 @@ bot.on('message', (msg) => {
     GetCoin();
     GetPrice();
   } else if (uniMsg == cPrice.substr(0,2)) {
-    csymbol = 'link';
-    GetCoin();
-    GetPrice();
-  } else if (uniMsg == cPrice.substr(0,2) + '@' + botuname) {
-    csymbol = 'link';
+    csymbol = 'yummy';
     GetCoin();
     GetPrice();
   }
 
-  if (uniMsg.startsWith(pHrs)) {
+  if (uniMsg.startsWith(cMin)) {
     csymbol = uniMsg.substr(4);
     chartURL = '&from=' + (today - 4 * hour) + '&to=' + today;
-    xMins = true;
     xHrs = true;
     xHrsDays = false;
     xDays = false;
-    timeMP = 3;
+    timeMP = 1;
     cptimeframe = ': 4 Hours'
     GetCoin();
     GetChart();
-  } else if (uniMsg == pHrs.substr(0,3)) {
-    csymbol = 'link';
+  } else if (uniMsg == cMin.substr(0,3)) {
+    csymbol = 'yummy';
     chartURL = '&from=' + (today - 4 * hour) + '&to=' + today;
-    xMins = true;
     xHrs = true;
     xHrsDays = false;
     xDays = false;
-    timeMP = 3;
-    cptimeframe = ': 4 Hours'
-    GetCoin();
-    GetChart();
-  } else if (uniMsg == pHrs.substr(0,3) + '@' + botuname) {
-    csymbol = 'link';
-    chartURL = '&from=' + (today - 4 * hour) + '&to=' + today;
-    xMins = true;
-    xHrs = true;
-    xHrsDays = false;
-    xDays = false;
-    timeMP = 3;
+    timeMP = 1;
     cptimeframe = ': 4 Hours'
     GetCoin();
     GetChart();
   }
 
-  if (uniMsg.startsWith(pDay)) {
+  if (uniMsg.startsWith(cThrs)) {
     csymbol = uniMsg.substr(4);
     chartURL = '&from=' + (today - day) + '&to=' + today;
-    xMins = false;
     xHrs = true;
     xHrsDays = false;
     xDays = false;
-    timeMP = 12;
-    cptimeframe = ': 24 Hours'
+    timeMP = 7;
+    cptimeframe = ': 12 Hours'
     GetCoin();
     GetChart();
-  } else if (uniMsg == pDay.substr(0,3)) {
-    csymbol = 'link';
+  } else if (uniMsg == cThrs.substr(0,3)) {
+    csymbol = 'yummy';
     chartURL = '&from=' + (today - day) + '&to=' + today;
     xHrs = true;
     xHrsDays = false;
     xDays = false;
-    timeMP = 12;
-    cptimeframe = ': 24 Hours'
-    GetCoin();
-    GetChart();
-  } else if (uniMsg == pDay.substr(0,3) + '@' + botuname) {
-    csymbol = 'link';
-    chartURL = '&from=' + (today - day) + '&to=' + today;
-    xHrs = true;
-    xHrsDays = false;
-    xDays = false;
-    timeMP = 12;
+    timeMP = 7;
     cptimeframe = ': 24 Hours'
     GetCoin();
     GetChart();
   }
 
-  if (uniMsg.startsWith(pWk)) {
+  if (uniMsg.startsWith(cHdy)) {
     csymbol = uniMsg.substr(4);
     chartURL = '&from=' + (today - week) + '&to=' + today;
-    xMins = false;
-    xHrs = false;
-    xHrsDays = true;
+    xHrs = true;
+    xHrsDays = false;
     xDays = false;
-    timeMP = 8;
+    timeMP = 4;
     cptimeframe = ': 7 Days'
     GetCoin();
     GetChart();
-  } else if (uniMsg == pWk.substr(0,3)) {
-    csymbol = 'link';
+  } else if (uniMsg == cHdy.substr(0,3)) {
+    csymbol = 'yummy';
     chartURL = '&from=' + (today - week) + '&to=' + today;
-    xMins = false;
-    xHrs = false;
-    xHrsDays = true;
+    xHrs = true;
+    xHrsDays = false;
     xDays = false;
-    timeMP = 8;
-    cptimeframe = ': 7 Days'
-    GetCoin();
-    GetChart();
-  } else if (uniMsg == pWk.substr(0,3) + '@' + botuname) {
-    csymbol = 'link';
-    chartURL = '&from=' + (today - week) + '&to=' + today;
-    xMins = false;
-    xHrs = false;
-    xHrsDays = true;
-    xDays = false;
-    timeMP = 8;
+    timeMP = 4;
     cptimeframe = ': 7 Days'
     GetCoin();
     GetChart();
   }
 
-  if (uniMsg.startsWith(pMnt)) {
+  if (uniMsg.startsWith(cDay)) {
     csymbol = uniMsg.substr(4);
     chartURL = '&from=' + (today - month) + '&to=' + today;
-    xMins = false;
     xHrs = false;
     xHrsDays = false;
     xDays = true;
-    timeMP = 21;
+    timeMP = 15;
     cptimeframe = ': 30 Days'
     GetCoin();
     GetChart();
-  } else if (uniMsg == pMnt.substr(0,3)) {
-    csymbol = 'link';
+  } else if (uniMsg == cDay.substr(0,3)) {
+    csymbol = 'yummy';
     chartURL = '&from=' + (today - month) + '&to=' + today;
-    xMins = false;
     xHrs = false;
     xHrsDays = false;
     xDays = true;
-    timeMP = 21;
-    cptimeframe = ': 30 Days'
-    GetCoin();
-    GetChart();
-  } else if (uniMsg == pMnt.substr(0,3) + '@' + botuname) {
-    csymbol = 'link';
-    chartURL = '&from=' + (today - month) + '&to=' + today;
-    xMins = false;
-    xHrs = false;
-    xHrsDays = false;
-    xDays = true;
-    timeMP = 21;
+    timeMP = 15;
     cptimeframe = ': 30 Days'
     GetCoin();
     GetChart();
   }
 
-  if (uniMsg.startsWith(pQrt)) {
+  if (uniMsg.startsWith(cHwk)) {
     csymbol = uniMsg.substr(4);
     chartURL = '&from=' + (today - 3 * month) + '&to=' + today;
-    xMins = false;
     xHrs = false;
     xHrsDays = false;
     xDays = true;
-    timeMP = 100;
+    timeMP = 40;
     cptimeframe = ': 90 Days'
     GetCoin();
     GetChart();
-  } else if (uniMsg == pQrt.substr(0,3)) {
-    csymbol = 'link';
+  } else if (uniMsg == cHwk.substr(0,3)) {
+    csymbol = 'yummy';
     chartURL = '&from=' + (today - 3 * month) + '&to=' + today;
     xHrs = false;
     xHrsDays = false;
     xDays = true;
-    timeMP = 100;
-    cptimeframe = ': 90 Days'
-    GetCoin();
-    GetChart();
-  } else if (uniMsg == pQrt.substr(0,3) + '@' + botuname) {
-    csymbol = 'link';
-    chartURL = '&from=' + (today - 3 * month) + '&to=' + today;
-    xHrs = false;
-    xHrsDays = false;
-    xDays = true;
-    timeMP = 100;
+    timeMP = 40;
     cptimeframe = ': 90 Days'
     GetCoin();
     GetChart();
   }
 
-  if (uniMsg.startsWith(pSixm)) {
-    csymbol = uniMsg.substr(4);
-    chartURL = '&from=' + (today - 6 * month) + '&to=' + today;
-    xMins = false;
-    xHrs = false;
-    xHrsDays = false;
-    xDays = true;
-    timeMP = 7;
-    cptimeframe = ': 180 Days'
-    GetCoin();
-    GetChart();
-  } else if (uniMsg == pSixm.substr(0,3)) {
-    csymbol = 'link';
-    chartURL = '&from=' + (today - 6 * month) + '&to=' + today;
-    xMins = false;
-    xHrs = false;
-    xHrsDays = false;
-    xDays = true;
-    timeMP = 7;
-    cptimeframe = ': 180 Days'
-    GetCoin();
-    GetChart();
-  } else if (uniMsg == pSixm.substr(0,3) + '@' + botuname) {
-    csymbol = 'link';
-    chartURL = '&from=' + (today - 6 * month) + '&to=' + today;
-    xMins = false;
-    xHrs = false;
-    xHrsDays = false;
-    xDays = true;
-    timeMP = 7;
-    cptimeframe = ': 180 Days'
-    GetCoin();
-    GetChart();
-  }
-
-  if (uniMsg.startsWith(pYr)) {
+  if (uniMsg.startsWith(cMnt)) {
     csymbol = uniMsg.substr(4);
     chartURL = '&from=' + (today - 12 * month) + '&to=' + today;
-    xMins = false;
     xHrs = false;
     xHrsDays = false;
     xDays = true;
-    timeMP = 14;
+    timeMP = 7;
     cptimeframe = ': 365 Days'
     GetCoin();
     GetChart();
-  } else if (uniMsg == pYr.substr(0,3)) {
-    csymbol = 'link';
+  } else if (uniMsg == cMnt.substr(0,3)) {
+    csymbol = 'yummy';
     chartURL = '&from=' + (today - 12 * month) + '&to=' + today;
-    xMins = false;
     xHrs = false;
     xHrsDays = false;
     xDays = true;
-    timeMP = 14;
-    cptimeframe = ': 365 Days'
-    GetCoin();
-    GetChart();
-  } else if (uniMsg == pYr.substr(0,3) + '@' + botuname) {
-    csymbol = 'link';
-    chartURL = '&from=' + (today - 12 * month) + '&to=' + today;
-    xMins = false;
-    xHrs = false;
-    xHrsDays = false;
-    xDays = true;
-    timeMP = 14;
+    timeMP = 7;
     cptimeframe = ': 365 Days'
     GetCoin();
     GetChart();
   }
 
-  if (uniMsg.startsWith(iDay)) {
+  if (uniMsg.startsWith(cpHrs)) {
     csymbol = uniMsg.substr(4);
     chartURL = 'days=1';
     xHrs = true;
@@ -407,17 +255,8 @@ bot.on('message', (msg) => {
     cptimeframe = '24 Hours'
     GetCoin();
     GetCandleChart();
-  } else if (uniMsg == iDay.substr(0,3)) {
-    csymbol = 'link';
-    chartURL = 'days=1';
-    xHrs = true;
-    xHrsDays = false;
-    xDays = false;
-    cptimeframe = '24 Hours'
-    GetCoin();
-    GetCandleChart();
-  } else if (uniMsg == iDay.substr(0,3) + '@' + botuname) {
-    csymbol = 'link';
+  } else if (uniMsg == cpHrs.substr(0,3)) {
+    csymbol = 'yummy';
     chartURL = 'days=1';
     xHrs = true;
     xHrsDays = false;
@@ -427,95 +266,27 @@ bot.on('message', (msg) => {
     GetCandleChart();
   }
 
-  if (uniMsg.startsWith(iWk)) {
-    csymbol = uniMsg.substr(4);
-    chartURL = 'days=7';
-    xHrs = false;
-    xHrsDays = false;
-    xDays = true;
-    cptimeframe = '7 Days';
-    GetCoin();
-    GetCandleChart();
-  } else if (uniMsg == iWk.substr(0,3)) {
-    csymbol = 'link';
-    chartURL = 'days=7';
-    xHrs = false;
-    xHrsDays = false;
-    xDays = true;
-    cptimeframe = '7 Days';
-    GetCoin();
-    GetCandleChart();
-  } else if (uniMsg == iWk.substr(0,3) + '@' + botuname) {
-    csymbol = 'link';
-    chartURL = 'days=7';
-    xHrs = false;
-    xHrsDays = false;
-    xDays = true;
-    cptimeframe = '7 Days';
-    GetCoin();
-    GetCandleChart();
-  }
-
-  if (uniMsg.startsWith(iFtnt)) {
+  if (uniMsg.startsWith(cpDay)) {
     csymbol = uniMsg.substr(4);
     chartURL = 'days=14';
     xHrs = false;
-    xHrsDays = false;
-    xDays = true;
+    xHrsDays = true;
+    xDays = false;
     cptimeframe = '14 Days';
     GetCoin();
     GetCandleChart();
-  } else if (uniMsg == iFtnt.substr(0,3)) {
-    csymbol = 'link';
+  } else if (uniMsg == cpDay.substr(0,3)) {
+    csymbol = 'yummy';
     chartURL = 'days=14';
     xHrs = false;
-    xHrsDays = false;
-    xDays = true;
-    cptimeframe = '14 Days';
-    GetCoin();
-    GetCandleChart();
-  } else if (uniMsg == iFtnt.substr(0,3) + '@' + botuname) {
-    csymbol = 'link';
-    chartURL = 'days=14';
-    xHrs = false;
-    xHrsDays = false;
-    xDays = true;
+    xHrsDays = true;
+    xDays = false;
     cptimeframe = '14 Days';
     GetCoin();
     GetCandleChart();
   }
 
-
-  if (uniMsg.startsWith(iMonth)) {
-    csymbol = uniMsg.substr(4);
-    chartURL = 'days=30';
-    xHrs = false;
-    xHrsDays = false;
-    xDays = true;
-    cptimeframe = '30 Days';
-    GetCoin();
-    GetCandleChart();
-  } else if (uniMsg == iMonth.substr(0,3)) {
-    csymbol = 'link';
-    chartURL = 'days=30';
-    xHrs = false;
-    xHrsDays = false;
-    xDays = true;
-    cptimeframe = '30 Days';
-    GetCoin();
-    GetCandleChart();
-  } else if (uniMsg == iMonth.substr(0,3) + '@' + botuname) {
-    csymbol = 'link';
-    chartURL = 'days=30';
-    xHrs = false;
-    xHrsDays = false;
-    xDays = true;
-    cptimeframe = '30 Days';
-    GetCoin();
-    GetCandleChart();
-  }
-
-  if (uniMsg.startsWith(iQrt)) {
+  if (uniMsg.startsWith(cpHmt)) {
     csymbol = uniMsg.substr(4);
     chartURL = 'days=90';
     xHrsMins = false;
@@ -524,17 +295,8 @@ bot.on('message', (msg) => {
     cptimeframe = '90 Days';
     GetCoin();
     GetCandleChart();
-  } else if (uniMsg == iQrt.substr(0,3)) {
-    csymbol = 'link';
-    chartURL = 'days=90';
-    xHrsMins = false;
-    xHrsDays = false;
-    xDays = true;
-    cptimeframe = '90 Days';
-    GetCoin();
-    GetCandleChart();
-  } else if (uniMsg == iQrt.substr(0,3) + '@' + botuname) {
-    csymbol = 'link';
+  } else if (uniMsg == cpHmt.substr(0,3)) {
+    csymbol = 'yummy';
     chartURL = 'days=90';
     xHrsMins = false;
     xHrsDays = false;
@@ -544,7 +306,7 @@ bot.on('message', (msg) => {
     GetCandleChart();
   }
 
-  if (uniMsg.startsWith(iSixm)) {
+  if (uniMsg.startsWith(cpQrt)) {
     csymbol = uniMsg.substr(4);
     chartURL = 'days=180';
     xHrs = false;
@@ -553,17 +315,8 @@ bot.on('message', (msg) => {
     cptimeframe = '180 Days';
     GetCoin();
     GetCandleChart();
-  } else if (uniMsg == iSixm.substr(0,3)) {
-    csymbol = 'link';
-    chartURL = 'days=180';
-    xHrs = false;
-    xHrsDays = false;
-    xDays = true;
-    cptimeframe = '180 Days';
-    GetCoin();
-    GetCandleChart();
-  } else if (uniMsg == iSixm.substr(0,3) + '@' + botuname) {
-    csymbol = 'link';
+  } else if (uniMsg == cpQrt.substr(0,3)) {
+    csymbol = 'yummy';
     chartURL = 'days=180';
     xHrs = false;
     xHrsDays = false;
@@ -573,7 +326,47 @@ bot.on('message', (msg) => {
     GetCandleChart();
   }
 
-  if (uniMsg.startsWith(iYear)) {
+  if (uniMsg.startsWith(cpWks)) {
+    csymbol = uniMsg.substr(4);
+    chartURL = 'days=7';
+    xHrs = false;
+    xHrsDays = true;
+    xDays = false;
+    cptimeframe = '7 Days';
+    GetCoin();
+    GetCandleChart();
+  } else if (uniMsg == cpWks.substr(0,3)) {
+    csymbol = 'yummy';
+    chartURL = 'days=7';
+    xHrs = false;
+    xHrsDays = false;
+    xDays = true;
+    cptimeframe = '7 Days';
+    GetCoin();
+    GetCandleChart();
+  }
+
+  if (uniMsg.startsWith(cpMonth)) {
+    csymbol = uniMsg.substr(4);
+    chartURL = 'days=30';
+    xHrs = false;
+    xHrsDays = false;
+    xDays = true;
+    cptimeframe = '30 Days';
+    GetCoin();
+    GetCandleChart();
+  } else if (uniMsg == cpMonth.substr(0,3)) {
+    csymbol = 'yummy';
+    chartURL = 'days=30';
+    xHrs = false;
+    xHrsDays = false;
+    xDays = true;
+    cptimeframe = '30 Days';
+    GetCoin();
+    GetCandleChart();
+  }
+
+  if (uniMsg.startsWith(cpYear)) {
     csymbol = uniMsg.substr(4);
     cptimeframe = '1 Year'
     xHrs = false;
@@ -582,17 +375,8 @@ bot.on('message', (msg) => {
     chartURL = 'days=365';
     GetCoin();
     GetCandleChart();
-  } else if (uniMsg == iYear.substr(0,3)) {
-    csymbol = 'link';
-    chartURL = 'days=365';
-    xHrs = false;
-    xHrsDays = false;
-    xDays = true;
-    cptimeframe = '1 Year'
-    GetCoin();
-    GetCandleChart();
-  } else if (uniMsg == iYear.substr(0,3) + '@' + botuname) {
-    csymbol = 'link';
+  } else if (uniMsg == cpYear.substr(0,3)) {
+    csymbol = 'yummy';
     chartURL = 'days=365';
     xHrs = false;
     xHrsDays = false;
@@ -606,9 +390,9 @@ bot.on('message', (msg) => {
 //ABOUT
 if (uniMsg == "/about" || uniMsg == "/about@" + botuname) {
   bot.sendChatAction(msg.chat.id, 'typing');
-  bot.sendAnimation(msg.chat.id, coverCommands[4], {caption: '*This bot is developed by:* [STKDevworks](https://github.com/STKDevworks)' +
+  bot.sendAnimation(msg.chat.id, coverCommands[4], {caption: '*This bot is developed by:* [STKDevworks](https://github.com/STKDevworks) & Pureon (pureon.ca) @mercuzzi' +
     '\n\nAvailable free-of-charge and not meant for commercial use. Modifications and self-hosting available with attribution. Image copyright belongs to their respective owners.' +
-    '\n\nSupport by spreading the word, or donating:' +
+    '\n\nSupport by spreading the word, or donating to STKDevworks. Powered by CoinGecko.com and BscScan.com APIs :' +
     '\n\nBTC: `bc1qmzpk2lu4n8uq6peyqz2shuk09567vg5xmf6hka`' + '\n\n ETH/ERC-20: `0x2B306bFA3Ba2ECd43303D2D88EF5406C34459077`',
     parse_mode: 'Markdown'})
     };
@@ -616,14 +400,13 @@ if (uniMsg == "/about" || uniMsg == "/about@" + botuname) {
 
 //GET HELP
 
-if (uniMsg == "/help" || uniMsg == "/help@" + botuname) {
+if (uniMsg == "/start" || uniMsg == "/start@" + botuname) {
   bot.sendChatAction(msg.chat.id, 'typing');
   bot.sendAnimation(msg.chat.id, coverCommands[2], {caption :
-    "\n/i - `Get coin information e.g. /c btc`" +
-    "\n/p - `Get coin market data e.g. /p ethereum`" +
-    "\n/ph | /pd | /pw | /pm | /pq | /ps | /py - `Get price & volume chart at various time scales`" +
-    "\n/id | /iw | /if | /im | /iq | /is | /iy - `Get price chart with indicators at various time scales`" +
-    "\n/top - `Get the Top 25 Coins by Marketcap`" +
+    "\n/i - `Get coin information e.g. /i btc`" +
+    "\n/d - `Get coin market data e.g. /d ethereum`" +
+    "\n/mn | /mh | /mt | /md | /mw | /mf - `Get price & volume chart at various time scales`" +
+    "\n/ph | /pw | /pf | /pd - `Get price chart with indicators at various time scales`" +
     "\n/hot - `Get the Top 7 Trending Coins`" +
     "\n/crypto - `Get global crypto market data`" +
     "\n/defi - `Get global DeFi market data`" +
@@ -839,12 +622,14 @@ for (var i = 0; i < 5; i++) {
         thrsrchindex = i;
       }
     } console.log(threadurl)
+    var thdbdy = threadobj.posts[thrsrchindex].com.replace(/<[^>]*?/gm, '').substr(0, 500);
     thrimgurl = wImageUrl + threadobj.posts[thrsrchindex].tim + threadobj.posts[thrsrchindex].ext;
     bot.sendChatAction(msg.chat.id, 'typing');
     bot.sendPhoto(msg.chat.id, thrimgurl, { caption: ' * ' + '' + threadobj.posts[thrsrchindex].sub + '' + ' * ' +
-    '\n' + threadobj.posts[thrsrchindex].replies + ' replies from ' + threadobj.posts[thrsrchindex].unique_ips + ' IDs: ' +
+    '\n' + thdbdy + ' ... ' +
+    '\n' +
+    '\n * ' + threadobj.posts[thrsrchindex].replies + ' * replies from * ' + threadobj.posts[thrsrchindex].unique_ips + '* IDs: ' +
     '\n[Read Full Story on /biz/]' + '(' + threadurl + ')' , parse_mode: 'Markdown' });
-
   })
   })
 
@@ -896,18 +681,6 @@ if (uniMsg == "/wjk" || uniMsg == "/wjk@" + botuname) {
     }))
     };
 
-GetLinkCap();
-    var linkmcap;
-    function GetLinkCap() {
-
-  axios.get(geckoAPI + '/coins/markets?vs_currency=usd&ids=' + 'chainlink' +'&order=market_cap_desc&per_page=100&page=1&sparkline=false')
-      .then(function (response) {
-          var priceobj = response.data;
-          linkmcap = priceobj[0].market_cap;
-          console.log(linkmcap);
-        });
-    }
-
 if (uniMsg == "/crypto" || uniMsg == "/crypto@" + botuname) {
 axios.get(geckoAPI + '/global')
 .then (function (response) {
@@ -920,18 +693,13 @@ axios.get(geckoAPI + '/global')
   var tmcap = respobj.data.total_market_cap.usd.toLocaleString('en-US', { notation: 'compact', compactDisplay: 'short'});
   var tvol = respobj.data.total_volume.usd.toLocaleString('en-US', { notation: 'compact', compactDisplay: 'short'});
   var btcdom = respobj.data.market_cap_percentage.btc.toFixed(2);
-  var linkdom = (linkmcap / respobj.data.total_market_cap.usd).toFixed(4);
   bot.sendChatAction(msg.chat.id, 'typing');
-  bot.sendAnimation(msg.chat.id, coverCommands[0], { caption: '*Global Market Data - Crypto:*' +
-  '\n*Total Coins:* ' + totalcoins +
-  '\n*Upcoming ICOs:* ' + upcico +
-  '\n*Ongoing ICOs:* ' + ongico +
-  '\n*Ended ICOs:* ' + endico +
-  '\n*Markets:* ' + mkts +
-  '\n*Total Market Cap:* $' + tmcap +
-  '\n*Total Volume (24h):* $' + tvol +
-  '\n*Bitcoin Dominance:* ' + btcdom + '%' +
-  '\n*Chainlink Dominance:* ' + linkdom + '%' , parse_mode: 'Markdown'});
+  bot.sendAnimation(msg.chat.id, coverCommands[0], { caption: '*Global Market Data - Crypto ($USD):*' +
+  '\n*💵 Total Market Cap:* $' + tmcap +
+  '\n*💰 Total Coins:* ' + totalcoins +
+  '\n*🏛️ Markets:* ' + mkts +
+  '\n*📈 Total Volume (24h):* $' + tvol +
+  '\n*💎Bitcoin Dominance:* ' + btcdom + '%', parse_mode: 'Markdown'});
 });
 }
 
@@ -956,6 +724,56 @@ if (uniMsg == "/defi" || uniMsg == "/defi@" + botuname) {
     '\n*Top DeFi Coin:* $' + defitop +
     '\n*Top DeFi Dominance:* $' + defitopdom + '%', parse_mode: 'Markdown'});
   });
+}
+
+//GET COIN
+
+function GetCoin() {
+for (var i = 0; i < coinsList.length; i++) {
+  if (coinsList[i].symbol.toString() == csymbol) {
+    cid = coinsList[i].id;
+    cfound = true;
+    break;
+  } else {
+    cid = csymbol;
+    if (coinsList[i].id == cid) {
+    cfound = true;
+    break;
+  } else {
+    cfound = false;
+  }
+  }
+}
+}
+
+
+//GET PROJECT INFO
+function GetProjectInfo() {
+if (cfound) {
+  axios.get(geckoAPI + '/coins/' + cid + '?market_data=true&community_data=true')
+  .then(function (response) {
+	var priceobj = response.data;
+    bot.sendChatAction(msg.chat.id, 'typing');
+    bot.sendPhoto(msg.chat.id, priceobj.image.large, {caption:
+    '[' + priceobj.name + ']' + '(' + priceobj.links.homepage[0] + ')' + ' | ' + priceobj.symbol.toUpperCase() +
+    '\n\n*💵 Price ($USD):* ' + priceobj.market_data.current_price.usd +
+    '\n*📈 24h High:* ' + priceobj.market_data.high_24h.usd +
+    '\n*📉 24h Low:* ' + priceobj.market_data.low_24h.usd +
+    '\n*👛 Total Supply:* ' + priceobj.market_data.total_supply +
+    '\n*🤝 24h Trading Volume:* ' + priceobj.market_data.total_volume.usd +
+    '\n🏛️ Live Chart: [Poocoin](' + poocoin + priceobj.contract_address + ')' + 
+    '\n*📊 CoinGecko Rank:* #' + priceobj.coingecko_rank +
+    '\n*💙 Twitter Followers:* ' + priceobj.community_data.twitter_followers +
+    '\n*✈️ Telegram Users:* ' + priceobj.community_data.telegram_channel_user_count +
+    '\n*❤️ Reddit Subs:* ' + priceobj.community_data.reddit_subscribers +
+    '\n*👍 Sentiment:* ' + priceobj.sentiment_votes_up_percentage + '%' +
+    '\n*🦎 CoinGecko Score:* ' + priceobj.coingecko_score +
+    '\n*👨‍👩‍👧‍👦 Community Score :* ' + priceobj.community_score +
+    '\n*💰 Liquidity Score:* ' + priceobj.liquidity_score +
+    '\n\n[Read more here...](' + geckoWEB + priceobj.name.toLowerCase() + ')',
+    parse_mode: 'Markdown'});
+  });
+ }
 }
 
 
@@ -997,161 +815,74 @@ bot.sendAnimation(msg.chat.id, coverCommands[3], { caption: "[Top-7 Trending Coi
 };
 
 
-//GET TOP 24 HOUR TOP 25
-if (uniMsg == "/top" || uniMsg == "/top@" + botuname) {
-  axios.get(geckoAPI + '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=25&page=1&sparkline=false')
-  .then (function (response) {
-    var respobj = response.data;
-    var smb = [];
-    var prc = [];
-    var prh = [];
-    var prl = [];
-    var prcc = [];
-    var prcp = [];
-    var toptext = [];
-    var chg = [];
-    var chgcmt;
-    for (var i = 0; i < respobj.length; i++) {
-      // console.log(respobj[i]);
-      smb[i] = respobj[i].symbol.toUpperCase();
-      prc[i] = respobj[i].current_price.toLocaleString('en-US', { notation: 'compact', compactDisplay: 'short'});
-      prh[i] = respobj[i].high_24h.toLocaleString('en-US', { notation: 'compact', compactDisplay: 'short'});
-      prl[i] = respobj[i].low_24h.toLocaleString('en-US', { notation: 'compact', compactDisplay: 'short'});
-      prcc[i] = respobj[i].price_change_24h.toLocaleString('en-US', { notation: 'compact', compactDisplay: 'short'});
-      prcp[i] = respobj[i].price_change_percentage_24h.toFixed(2);
-      chg[i] = respobj[i].price_change_percentage_24h;
-      toptext[i] = '*' + [1 + i] + '. ' + smb[i] + ':* $' + prc[i] + ' | H: $' + prh[i] + ' | L: $' + prl[i] + ' | 24h: $' + prcc[i] + ' / ' + prcp[i] + '%\n', { parse_mode: 'Markdown'};
-
-    }
-      avgchg = chg.reduce((a, b) => a + b, 0) / prcc.length
-      avgchg = avgchg.toFixed(2);
-      if (avgchg < -25 ){
-        chgcmt = 'Here comes the Wojak train!';
-      } else if (avgchg > 25 ) {
-        chgcmt = 'Number go up! ';
-      } else {
-        chgcmt = "Crabfest galore...";
-      };
-console.log(toptext.join(','));
-bot.sendMessage(msg.chat.id, '*Top 25 Coins by Marketcap:* \n' + toptext.join('') + '\n *Average Change: ' + avgchg + '% | ' + chgcmt + '*', {parse_mode: 'Markdown'});
-}
-)};
-
-
-
-//GET COIN
-
-function GetCoin() {
-for (var i = 0; i < coinsList.length; i++) {
-  if (coinsList[i].symbol.toString() == csymbol) {
-    cid = coinsList[i].id;
-    cfound = true;
-    break;
-  } else {
-    cid = csymbol;
-    if (coinsList[i].id == cid) {
-    cfound = true;
-    break;
-  } else {
-    cfound = false;
-  }
-  }
-}
-}
-
-
-//GET PROJECT INFO
-function GetProjectInfo() {
-if (cfound) {
-  axios.get(geckoAPI + '/coins/' + cid)
-  .then(function (response) {
-    var priceobj = response.data;
-    bot.sendChatAction(msg.chat.id, 'typing');
-    bot.sendPhoto(msg.chat.id, priceobj.image.large, {caption:
-    '[' + priceobj.name + ']' + '(' + priceobj.links.homepage[0] + ')' + ' | ' + priceobj.symbol.toUpperCase() +
-    '\n\n*Marketcap:* #' + priceobj.market_cap_rank +
-    '\n*Sentiment:* ' + priceobj.sentiment_votes_up_percentage +
-    '\n*CoinGecko:* ' + priceobj.coingecko_score +
-    '\n*Development:* ' + priceobj.developer_score +
-    '\n*Community:* ' + priceobj.community_score +
-    '\n*Liquidity:* ' + priceobj.liquidity_score +
-    '\n*Alexa Rank:* ' + priceobj.public_interest_stats.alexa_rank +
-    '\n\n[Read more here...](' + geckoWEB + priceobj.name + ')',
-    parse_mode: 'Markdown'});
-  });
- }
-}
-
-
     //GET COIN PRICE
 function GetPrice() {
-
   if (cfound) {
           axios.get(geckoAPI + '/coins/markets?vs_currency=usd&ids=' + cid +'&order=market_cap_desc&per_page=100&page=1&sparkline=false')
           .then(function (response) {
-            cpriceobj = response.data;
-            available =
-            '*' + cpriceobj[0].name + '*' +
-            '\n*Rank:* #' + cpriceobj[0].market_cap_rank +
-            '\n*Price:* $' + nf.format(Math.round((cpriceobj[0].current_price + Number.EPSILON) * 100) / 100) +
-            '\n*Market Cap:* $' + nf.format(Math.round(cpriceobj[0].market_cap)) +
-            '\n*24h Volume:* $' + nf.format(Math.round(cpriceobj[0].total_volume)) +
-            '\n*24h High:* $' + nf.format(Math.round((cpriceobj[0].high_24h + Number.EPSILON) * 100) / 100) +
-            '\n*24h Low:* $' + nf.format(Math.round((cpriceobj[0].low_24h + Number.EPSILON) * 100) / 100) +
-            '\n*24h Change:* $' + nf.format(Math.round((cpriceobj[0].price_change_24h + Number.EPSILON) * 100) / 100) +
-            '\n*24h Change:* ' + nf.format(Math.round((cpriceobj[0].price_change_percentage_24h + Number.EPSILON) * 100) / 100) + '%' +
-            '\n*ATH: $*' + nf.format(Math.round((cpriceobj[0].ath + Number.EPSILON) * 100) / 100) +
-            '\n*ATH Difference:* ' + nf.format(Math.round((cpriceobj[0].ath_change_percentage + Number.EPSILON) * 100) / 100) + '%' +
-            '\n*ATL:* $' + nf.format(Math.round((cpriceobj[0].atl + Number.EPSILON) * 100) / 100) +
-            '\n*ATL Difference:* ' + nf.format(Math.round((cpriceobj[0].atl_change_percentage + Number.EPSILON) * 100) / 100) + '%' +
-            '\n*Circulating:* ' + nf.format(Math.round(cpriceobj[0].circulating_supply));
+            var priceobj = response.data;
+            var available =
+            '*' + priceobj[0].name + '*' +
+            '\n*Coingecko Rank:* #' + priceobj[0].coingecko_rank +
+            '\n*Price:* $' + nf.format(Math.round((priceobj[0].current_price + Number.EPSILON) * 100) / 100) +
+            '\n*Market Cap:* $' + nf.format(Math.round(priceobj[0].market_cap)) +
+            '\n*24h Volume:* $' + nf.format(Math.round(priceobj[0].total_volume)) +
+            '\n*24h High:* $' + nf.format(Math.round((priceobj[0].high_24h + Number.EPSILON) * 100) / 100) +
+            '\n*24h Low:* $' + nf.format(Math.round((priceobj[0].low_24h + Number.EPSILON) * 100) / 100) +
+            '\n*24h Change:* $' + nf.format(Math.round((priceobj[0].price_change_24h + Number.EPSILON) * 100) / 100) +
+            '\n*24h Change:* ' + nf.format(Math.round((priceobj[0].price_change_percentage_24h + Number.EPSILON) * 100) / 100) + '%' +
+            '\n*ATH: $*' + nf.format(Math.round((priceobj[0].ath + Number.EPSILON) * 100) / 100) +
+            '\n*ATH Difference:* ' + nf.format(Math.round((priceobj[0].ath_change_percentage + Number.EPSILON) * 100) / 100) + '%' +
+            '\n*ATL:* $' + nf.format(Math.round((priceobj[0].atl + Number.EPSILON) * 100) / 100) +
+            '\n*ATL Difference:* ' + nf.format(Math.round((priceobj[0].atl_change_percentage + Number.EPSILON) * 100) / 100) + '%' +
+            '\n*Circulating:* ' + nf.format(Math.round(priceobj[0].circulating_supply));
 
-            if (cpriceobj[0].roi != null && cpriceobj[0].total_supply != null && cpriceobj[0].max_supply != null && cpriceobj[0].fully_diluted_valuation != null) {
-            missing =
-            '\n*Total Supply:* ' + nf.format(Math.round(cpriceobj[0].total_supply)) +
-            '\n*Max Supply:* ' + nf.format(Math.round(cpriceobj[0].max_supply)) +
-            '\n*Diluted Valuation:* $' + nf.format(Math.round(cpriceobj[0].fully_diluted_valuation)) +
-            '\n*ROI:* ' + nf.format(Math.round((cpriceobj[0].roi.percentage + Number.EPSILON) * 100) / 100) + '%';
+            if (priceobj[0].roi != null && priceobj[0].total_supply != null && priceobj[0].max_supply != null && priceobj[0].fully_diluted_valuation != null) {
+            var missing =
+            '\n*Total Supply:* ' + nf.format(Math.round(priceobj[0].total_supply)) +
+            '\n*Max Supply:* ' + nf.format(Math.round(priceobj[0].max_supply)) +
+            '\n*Diluted Valuation:* $' + nf.format(Math.round(priceobj[0].fully_diluted_valuation)) +
+            '\n*ROI:* ' + nf.format(Math.round((priceobj[0].roi.percentage + Number.EPSILON) * 100) / 100) + '%';
 
-            details = available + missing;
+            var details = available + missing;
 
-          } else if (cpriceobj[0].total_supply == null && cpriceobj[0].max_supply == null && cpriceobj[0].fully_diluted_valuation == null) {
-            missing =
+          } else if (priceobj[0].total_supply == null && priceobj[0].max_supply == null && priceobj[0].fully_diluted_valuation == null) {
+            var missing =
             '\n*Total Supply:* N/A' +
             '\n*Max Supply:* N/A' +
             '\n*Diluted Valuation:* N/A' +
-            '\n*ROI:* ' + nf.format(Math.round((cpriceobj[0].roi.percentage + Number.EPSILON) * 100) / 100) + '%';
+            '\n*ROI:* ' + nf.format(Math.round((priceobj[0].roi.percentage + Number.EPSILON) * 100) / 100) + '%';
 
-            details = available + missing;
+            var details = available + missing;
 
-          } else if (cpriceobj[0].roi == null) {
-            missing =
-            '\n*Total Supply:* ' + nf.format(Math.round(cpriceobj[0].total_supply)) +
-            '\n*Max Supply:* ' + nf.format(Math.round(cpriceobj[0].max_supply)) +
-            '\n*Diluted Valuation:* $' + nf.format(Math.round(cpriceobj[0].fully_diluted_valuation)) +
+          } else if (priceobj[0].roi == null) {
+            var missing =
+            '\n*Total Supply:* ' + nf.format(Math.round(priceobj[0].total_supply)) +
+            '\n*Max Supply:* ' + nf.format(Math.round(priceobj[0].max_supply)) +
+            '\n*Diluted Valuation:* $' + nf.format(Math.round(priceobj[0].fully_diluted_valuation)) +
             '\n*ROI:* N/A';
 
-            details = available + missing;
+            var details = available + missing;
 
-          } else if (cpriceobj[0].max_supply == null && cpriceobj[0].fully_diluted_valuation == null) {
-            missing =
-            '\n*Total Supply:* ' + nf.format(Math.round(cpriceobj[0].total_supply)) +
+          } else if (priceobj[0].max_supply == null && priceobj[0].fully_diluted_valuation == null) {
+            var missing =
+            '\n*Total Supply:* ' + nf.format(Math.round(priceobj[0].total_supply)) +
             '\n*Max Supply:* N/A' +
             '\n*Diluted Valuation:* N/A' +
-            '\n*ROI:* ' + nf.format(Math.round((cpriceobj[0].roi.percentage + Number.EPSILON) * 100) / 100) + '%';
-            details = available + missing;
+            '\n*ROI:* ' + nf.format(Math.round((priceobj[0].roi.percentage + Number.EPSILON) * 100) / 100) + '%';
+
+            var details = available + missing;
 
           }
-          bot.sendChatAction(msg.chat.id, 'typing');
-          bot.sendPhoto(msg.chat.id, cpriceobj[0].image, {caption: details, parse_mode: 'Markdown'});
+            bot.sendChatAction(msg.chat.id, 'typing');
+            bot.sendPhoto(msg.chat.id, priceobj[0].image, {caption: details, parse_mode: 'Markdown'});
             cid = null;
             csymbol = null;
-        });
-      }  else {
-            bot.sendMessage(msg.chat.id, 'Cannot find "' + msg.text.substr(4) + '" in the database.');
+          });
+        }  else {
+              bot.sendMessage(msg.chat.id, 'Cannot find "' + msg.text.substr(4) + '" in the database.');
+            }
           }
-        }
-
 
 
 //GET CHART
@@ -1182,18 +913,13 @@ function GetChart(){
 
                   xval = xval.filter(function () { return true });
                   for (var i = 0; i < xval.length; i++) {
+                    tval[i] = new Date(xval[i]).toLocaleTimeString('en-US' , { hour: '2-digit', minute: '2-digit' });
                     dval[i] = new Date(xval[i]).toLocaleDateString('en-GB' , { month: 'numeric', day: 'numeric' });
-                    if (xMins && xHrs && !xHrsDays && !xDays) {
-                      tval[i] = new Date(xval[i]).toLocaleTimeString('en-US' , { hour: '2-digit', minute: '2-digit' });
+                    if (xHrs && !xHrsDays && !xDays) {
                       tdval[i] = tval[i];
-                    } else if (!xMins && xHrs && !xHrsDays && !xDays) {
-                      tval[i] = new Date(xval[i]).toLocaleTimeString('en-US' , { hour: '2-digit' });
-                      tdval[i] = tval[i];
-                    } else if (!xMins && !xHrs && xHrsDays && !xDays){
-                      tval[i] = new Date(xval[i]).toLocaleTimeString('en-US' , { hour: '2-digit' });
+                    } else if (!xHrs && xHrsDays && !xDays){
                       tdval[i] = dval[i] + ': ' + tval[i];
-                    } else if (!xMins && !xHrs && !xHrsDays && xDays) {
-                      tval[i] = new Date(xval[i]).toLocaleTimeString('en-US' , { hour: '2-digit' });
+                    } else if (!xHrs && !xHrsDays && xDays) {
                       tdval[i] = dval[i];
                     }
                   }
@@ -1239,7 +965,6 @@ function GetChart(){
                            fill: true,
                            order: 1,
                            grouped: false,
-                           //minBarLength: 100,
                            yAxisID: 'y-axis-1',
                            barThickness: 'flex',
                            categoryPercentage: 1,
@@ -1447,6 +1172,7 @@ function GetChart(){
                                        absavg[i] = math.std(amplitude[i], uptick[i], highval[i], avgcan[i], bottick[i], lowval[i]);
                                        lowavg[i] = absavg[i] - Math.min(amplitude[i], uptick[i], highval[i], avgcan[i], bottick[i], lowval[i]);
                                        highavg[i] = Math.max(amplitude[i], uptick[i], highval[i], avgcan[i], bottick[i], lowval[i]) - absavg[i];
+                                       console.log('avg:' + absavg[i] + 'l:' + lowavg[i] + 'h:' + highavg[i]);
 
                                     //SET CHART CONFIG
 
@@ -1493,7 +1219,6 @@ function GetChart(){
                                            borderCapStyle: 'cap',
                                            borderColor: 'rgba(200, 0, 200, 1)',
                                            backgroundColor: 'rgba(200, 0, 200, 0.1)',
-
                                            yAxisID: 'y-axis-1',
                                            tension: 0.1,
                                          },{
@@ -1581,7 +1306,6 @@ function GetChart(){
                                            type: 'bar',
                                            display: false,
                                            data: absavg,
-                                           //base: barval,
                                            borderWidth: 3,
                                            borderColor: 'rgba(100, 155, 0, 0.2)',
                                            backgroundColor: 'rgba(100, 155, 0, 0.2)',
